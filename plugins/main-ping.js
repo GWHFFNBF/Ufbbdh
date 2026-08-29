@@ -1,10 +1,9 @@
+// ping.js - ESM Version
 import { fileURLToPath } from 'url';
-import config from '../config.js';
-import { cmd, commands } from '../command.js';
+import { cmd } from '../command.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
-// --- PING COMMAND (MODERN UI) ---
 cmd({
     pattern: "ping",
     alias: ["speed", "pong"],
@@ -18,19 +17,26 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
     try {
         const start = new Date().getTime();
 
-        const reactionEmojis = ['⚡', '🚀', '🎯', '✨', '💎'];
-        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
+        const reactionEmojis = ['🔥', '⚡', '🚀', '💨', '🎯', '🎉', '🌟', '💥', '🕐', '🔹'];
+        const textEmojis = ['💎', '🏆', '⚡️', '🚀', '🎶', '🌠', '🌀', '🔱', '🛡️', '✨'];
 
-        // Quick reaction
+        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
+        let textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+
+        // Ensure reaction and text emojis are different
+        while (textEmoji === reactionEmoji) {
+            textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+        }
+
+        // Send reaction using conn.sendMessage()
         await conn.sendMessage(from, {
-            react: { text: reactionEmoji, key: mek.key }
+            react: { text: textEmoji, key: mek.key }
         });
 
         const end = new Date().getTime();
         const responseTime = (end - start) / 1000;
 
-        // Ultra Sleek Text Design (ORIGINAL)
-        const text = `*ᴘᴏɴɢ...!!* 📡\n\n*🚀 sᴘᴇᴇᴅ:* ${responseTime.toFixed(2)}ms\n*🧬 sᴛᴀᴛᴜs:* Online\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ DOCTOR-MD*`;
+        const text = `> *DOCTOR-MD SPEED: ${responseTime.toFixed(2)}ms ${reactionEmoji}*`;
 
         await conn.sendMessage(from, {
             text,
@@ -40,7 +46,7 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363426641229472@newsletter',
-                    newsletterName: "DOCTOR-MD TECH",
+                    newsletterName: "DR KAMRAN",
                     serverMessageId: 143
                 }
             }
@@ -48,69 +54,45 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
 
     } catch (e) {
         console.error("Error in ping command:", e);
-        reply(`⚠️ Error: ${e.message}`);
+        reply(`An error occurred: ${e.message}`);
     }
 });
 
-// --- PING2 COMMAND (DASHBOARD UI) ---
 cmd({
     pattern: "ping2",
-    desc: "Check bot's response time with dashboard view.",
+    desc: "Check bot's response time.",
     category: "main",
-    react: "🚀",
+    react: "⚡",
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
     try {
         const startTime = Date.now();
+
+        // Simulated natural processing delay
         await new Promise(resolve => setTimeout(resolve, 500));
+
         const endTime = Date.now();
         const ping = endTime - startTime;
 
+        // Speed category
         let status;
-        let indicator;
-        if (ping < 1000) {
-            status = "𝐄𝐱𝐜𝐞𝐥𝐥𝐞𝐧𝐭";
-            indicator = "🟢";
-        } else if (ping < 1500) {
-            status = "𝐆𝐨ｏ𝐝";
-            indicator = "🟡";
-        } else {
-            status = "𝐋𝐚𝐠𝐠𝐲";
-            indicator = "🔴";
-        }
+        if (ping < 1000) status = "⚡ *Fast & Responsive*";
+        else if (ping < 1400) status = "⚙️ *Normal Speed*";
+        else status = "🐢 *Slow Response*";
 
-        // Dashboard Style Design (ORIGINAL)
+        // Stylish formatted output
         const msg = `
-┏━━━━━━━━━━━━━━━━━━┈⊷
-┃  ✨ *DOCTOR-MD SYSTEM* ✨
-┗━━━━━━━━━━━━━━━━━━┈⊷
-┃
-┃ 📡 *Latency:* ${ping} ms
-┃ 🧠 *Quality:* ${status} ${indicator}
-┃ ⚡ *Performance:* Stable
-┃ 🛰️ *Server:* Global-High
-┃
-┗━━━━━━━━━━━━━━━━━━┈⊷
+*╭┈──〔 ⚡ DOCTOR-ᴍᴅ Pɪɴɢ 〕─⊷*
+*├▢ 📶 Response:* ${ping} ms
+*├▢ 🧠 Status:* ${status}
+*├▢ 💫 Mode:* Active & Stable
+*╰───────────────⊷*
+        `;
 
-> *Created by DR KAMRAN*`;
-
-        await conn.sendMessage(from, { 
-            text: msg.trim(),
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363426641229472@newsletter',
-                    newsletterName: "DOCTOR-MD",
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: mek });
-
+        await conn.sendMessage(from, { text: msg.trim() }, { quoted: mek });
     } catch (e) {
         console.log(e);
         reply(`⚠️ Error: ${e.message}`);
     }
 });
-
