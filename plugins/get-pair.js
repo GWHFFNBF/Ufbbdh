@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 
-const API_BASE_URL = 'https://doctor-md-sandy.vercel.app/api';
+const API_BASE_URL = 'https://doctor-md-sandy.vercel.app';
 
 cmd({
     pattern: "pair",
