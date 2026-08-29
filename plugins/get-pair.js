@@ -1,248 +1,100 @@
-import { cmd } from '../command.js';
-import axios from 'axios';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
+import { cmd, commands } from '../command.js';
+import { lidToPhone } from '../lib/functions.js';
 
-const __filename = fileURLToPath(import.meta.url);
+// Base URL
+const BASE_URL = 'https://doctor-md-sandy.vercel.app';
 
-const API_BASE_URL = 'https://doctor-md-sandy.vercel.app';
-
+// ==================== PAIR COMMAND ====================
 cmd({
     pattern: "pair",
     alias: ["getpair", "clonebot"],
     react: "✅",
-    desc: "Get pairing code for DOCTOR-MD bot",
+    desc: "Get pairing code for bot",
     category: "owner",
-    use: ".pair 923001234567",
-    filename: __filename
-
-}, async (conn, mek, m, {
-    q,
-    senderNumber,
-    reply,
-    react
-}) => {
-
+    use: ".pair 92319689XXX",
+    filename: fileURLToPath(import.meta.url)
+}, async (conn, mek, m, { from, args, sender, senderNumber, reply, react }) => {
     try {
-
-        // =========================
-        // LOADING REACTION
-        // =========================
         await react('⏳');
-
-        // =========================
-        // GET PHONE NUMBER
-        // =========================
-        const phoneNumber = q
-            ? q.replace(/[^0-9]/g, '')
-            : senderNumber.replace(/[^0-9]/g, '');
-
-        // =========================
-        // VALIDATE NUMBER
-        // =========================
-        if (!phoneNumber) {
-
-            await react('❌');
-
-            return await reply(
-                "❌ Please provide a phone number\n\nExample:\n.pair 923001234567"
-            );
-        }
-
-        if (phoneNumber.length < 10 || phoneNumber.length > 15) {
-
-            await react('❌');
-
-            return await reply(
-                "❌ Invalid phone number format"
-            );
-        }
-
-        // =========================
-        // FETCH SERVER LIST
-        // =========================
-        let serversResponse;
-
-        try {
-
-            serversResponse = await axios.get(
-                `${API_BASE_URL}/servers`,
-                {
-                    timeout: 20000
+        
+        let phoneNumber;
+        
+        if (args[0]) {
+            phoneNumber = args[0].trim().replace(/[^0-9]/g, '');
+        } else {
+            if (sender.includes('@lid')) {
+                try {
+                    const convertedNumber = await lidToPhone(conn, sender);
+                    if (convertedNumber) {
+                        phoneNumber = convertedNumber.replace(/[^0-9]/g, '');
+                    } else {
+                        phoneNumber = senderNumber;
+                    }
+                } catch (e) {
+                    phoneNumber = senderNumber;
                 }
-            );
-
-        } catch (e) {
-
-            console.log(
-                "SERVER FETCH ERROR:",
-                e.response?.data || e.message
-            );
-
-            await react('❌');
-
-            return await reply(
-                "❌ Failed to connect to API server"
-            );
+            } else {
+                phoneNumber = senderNumber;
+            }
         }
 
-        // =========================
-        // CHECK SERVER RESPONSE
-        // =========================
-        if (
-            !serversResponse.data ||
-            !Array.isArray(serversResponse.data.servers)
-        ) {
-
-            console.log(
-                "INVALID SERVER RESPONSE:",
-                serversResponse.data
-            );
-
+        if (!phoneNumber || phoneNumber.length < 10 || phoneNumber.length > 15) {
             await react('❌');
-
-            return await reply(
-                "❌ Invalid server response"
-            );
+            return reply("❌ Please provide a valid phone number without +\nExample: .pair 9231950XXX");
         }
 
-        // =========================
-        // SERVER ARRAY
-        // =========================
+        const serversResponse = await axios.get(`${BASE_URL}/servers`, { timeout: 10000 });
+        
+        if (!serversResponse.data || !serversResponse.data.servers) {
+            await react('❌');
+            return reply("❌ *Failed to fetch server list!*");
+        }
+        
         const servers = serversResponse.data.servers;
-
+        
         if (servers.length === 0) {
-
             await react('❌');
+            return reply("❌ *No servers available!*");
+        }
+        
+        const randomIndex = Math.floor(Math.random() * servers.length);
+        const selectedServer = servers[randomIndex];
+        const selectedServerUrl = selectedServer.url;
+        
+        const response = await axios.get(`${selectedServerUrl}/code`, {
+            params: { number: phoneNumber },
+            timeout: 20000
+        });
 
-            return await reply(
-                "❌ No active servers found"
-            );
+        if (!response.data || !response.data.code) {
+            await react('❌');
+            return reply("❌ Failed to retrieve pairing code. Please try again later.");
         }
 
-        // =========================
-        // RANDOM SERVER SELECT
-        // =========================
-        const randomServer =
-            servers[Math.floor(Math.random() * servers.length)];
-
-        if (!randomServer.url) {
-
-            await react('❌');
-
-            return await reply(
-                "❌ Invalid server URL"
-            );
-        }
-
-        // REMOVE LAST /
-        const serverUrl =
-            randomServer.url.replace(/\/$/, '');
-
-        console.log("SELECTED SERVER:", serverUrl);
-
-        // =========================
-        // GET PAIR CODE
-        // =========================
-        let response;
-
-        try {
-
-            response = await axios.get(
-                `${serverUrl}/code`,
-                {
-                    params: {
-                        number: phoneNumber
-                    },
-                    timeout: 60000
-                }
-            );
-
-        } catch (e) {
-
-            console.log(
-                "PAIR API ERROR:",
-                e.response?.data || e.message
-            );
-
-            await react('❌');
-
-            return await reply(
-                `❌ Pair API Failed\n\n${
-                    e.response?.data?.message ||
-                    e.message
-                }`
-            );
-        }
-
-        console.log(
-            "PAIR RESPONSE:",
-            response.data
-        );
-
-        // =========================
-        // EXTRACT PAIR CODE
-        // =========================
-        const pairingCode =
-            response.data?.code ||
-            response.data?.pair ||
-            response.data?.pairingCode;
-
-        // =========================
-        // CHECK PAIR CODE
-        // =========================
-        if (!pairingCode) {
-
-            console.log(
-                "INVALID PAIR RESPONSE:",
-                response.data
-            );
-
-            await react('❌');
-
-            return await reply(
-                "❌ Pair code not found in API response"
-            );
-        }
-
-        // =========================
-        // SUCCESS REACTION
-        // =========================
+        const pairingCode = response.data.code;
+        
         await react('✅');
+        
+        await reply(`> *DOCTOR-MD PAIRING CODE*
 
-        // =========================
-        // FIRST MESSAGE
-        // =========================
-        await reply(`
-╭━━〔 DOCTOR-MD PAIR 〕━━⬣
-┃
-┃ ✅ Pair code generated successfully
-┃ 🌐 SERVER: ${randomServer.name || 'Unknown'}
-┃
-┃ 📱 HOW TO CONNECT
-┃ 1. Open WhatsApp
-┃ 2. Linked Devices
-┃ 3. Link a Device
-┃ 4. Paste the code below
-┃
-╰━━━━━━━━━━━━━━⬣
-`);
+*Your pairing code is:* ${pairingCode}`);
 
-        // =========================
-        // SECOND MESSAGE (OTP ONLY)
-        // =========================
         await reply(pairingCode);
 
     } catch (error) {
-
-        console.log(
-            "FULL ERROR:",
-            error
-        );
-
+        console.error("Pair command error:", error);
         await react('❌');
-
-        return await reply(
-            `❌ Error:\n${error.message}`
-        );
+        
+        let errorMessage = "❌ An error occurred while getting pairing code. Please try again later.";
+        
+        if (error.response) {
+            errorMessage = `❌ Server error: ${error.response.status}`;
+        } else if (error.request) {
+            errorMessage = "❌ No response from server. Server might be offline.";
+        }
+        
+        await reply(errorMessage);
     }
 });
