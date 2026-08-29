@@ -1393,8 +1393,8 @@ async (conn, mek, m, { from, reply, isCreator, prefix, userConfig }) => {
 // ANTI Status COMMAND - FIXED
 // ===============================
 cmd({
-    pattern: "antistatus",
-    alias: ["anti-status"],
+    pattern: "antistatus6",
+    alias: ["anti-status6"],
     desc: "Toggle Anti Status protection\n\n*Options:*\n• on - Enable Anti Status (warn + delete)\n• off - Disable Anti Status\n• warn - Only warn users\n• delete - Only delete messages",
     category: "settings",
     react: "🚫",
