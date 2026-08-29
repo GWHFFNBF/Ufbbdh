@@ -30,7 +30,7 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
         const platform = os.platform();
 
         // PROFESSIONAL DASHBOARD DESIGN
-        const status = `*╭───────────〔 ᴀʜᴍᴀᴅ-ᴍᴅ 〕──────────┈⊷*
+        const status = `*╭───────────〔 DOCTOR-MD 〕──────────┈⊷*
 *│*
 *┝┤ 🤖 sᴛᴀᴛᴜs:* ᴏɴʟɪɴᴇ & ᴀᴄᴛɪᴠᴇ
 *┝┤ ⏱️ ᴜᴘᴛɪᴍᴇ:* ${uptime}
