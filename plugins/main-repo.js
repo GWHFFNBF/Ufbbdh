@@ -33,7 +33,7 @@ async (conn, mek, m, { from, reply, userConfig }) => {
         const OWNER_NAME = userConfig?.OWNER_NAME || config.OWNER_NAME || 'DOCTOR-MD';
         const BOT_IMAGE = userConfig?.BOT_IMAGE || userConfig?.BOT_MEDIA_URL || config.BOT_IMAGE || config.BOT_MEDIA_URL;
         
-        const deployLink = 'https://doctor-md.vercel.app';
+        const deployLink = 'https://doctor-md-sandy.vercel.app';
 
         // --- NEW PREMIUM DESIGN ---
         const formattedInfo = `
