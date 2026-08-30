@@ -18,7 +18,7 @@ cmd({
   isBotAdmins,
   reply,
   sender,
-  userConfig  // Added userConfig parameter
+  userConfig
 }) => {
   try {
     // Ignore messages from groups (remove this line if you want it to work in groups too)
@@ -32,15 +32,19 @@ cmd({
       // ⏳ React - processing
       await client.sendMessage(from, { react: { text: '⏳', key: message.key } });
 
-      const buffer = await message.quoted.download();
       const mtype = message.quoted.mtype;
-      const originalCaption = message.quoted.text || '';
+      const originalCaption = message.quoted.text || message.quoted.msg?.text || '';
       const options = { quoted: message };
-
-      // Get DESCRIPTION from userConfig if available, otherwise use config.DESCRIPTION
       const DESCRIPTION = userConfig?.DESCRIPTION || config.DESCRIPTION || "";
 
       let messageContent = {};
+      let buffer = null;
+
+      // Only download buffer if the status contains media
+      if (["imageMessage", "videoMessage", "audioMessage"].includes(mtype)) {
+        buffer = await message.quoted.download();
+      }
+
       switch (mtype) {
         case "imageMessage":
           messageContent = {
@@ -61,6 +65,13 @@ cmd({
             audio: buffer,
             mimetype: "audio/mp4",
             ptt: message.quoted.ptt || false
+          };
+          break;
+        case "conversation":
+        case "extendedTextMessage":
+          const textContent = originalCaption || message.quoted.msg?.conversation || "";
+          messageContent = {
+            text: textContent ? `${textContent}\n\n> ${DESCRIPTION}` : (DESCRIPTION ? `> ${DESCRIPTION}` : "")
           };
           break;
         default:
