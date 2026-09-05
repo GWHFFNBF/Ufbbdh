@@ -49,7 +49,7 @@ async (conn, mek, m, { from, pushname, reply }) => {
             menuSections += formatCategory(cat, catCmds);
         });
 
-        const BOT_NAME = config.BOT_NAME || "AHMAD-MD";
+        const BOT_NAME = config.BOT_NAME || "DOCTOR-MD";
         const uptime = runtime(process.uptime());
 
         // --- UPGRADED PREMIUM INTERFACE DESIGN ---
@@ -57,7 +57,7 @@ async (conn, mek, m, { from, pushname, reply }) => {
 👑 *${BOT_NAME.toUpperCase()}* 👑
 
 ┌─── ❖ *SYSTEM INFO* ❖
-│ 👑 *Owner:* ${config.OWNER_NAME || "Ahmad Hassan"}
+│ 👑 *Owner:* ${config.OWNER_NAME || "DR KAMRAN"}
 │ ⏱️ *Uptime:* ${uptime}
 │ 📜 *Commands:* ${Object.keys(commands).length}
 │ 🌐 *Mode:* ${config.MODE || "Public"}
@@ -67,7 +67,7 @@ ${menuSections}
 > *✨ ᴘᴏᴡᴇʀᴇᴅ ʙʏ DOCTOR MD ✨*`;
 
         // Image URL Selection
-        let imageToUse = "https://i.ibb.co/84NpJd5V/1787977996211.png";
+        let imageToUse = "https://i.ibb.co/qMvTTr4k/doctormd.jpg";
 
         // 1. Menu Image Send with Caption
         await conn.sendMessage(from, { 
